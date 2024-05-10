@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -52,7 +53,7 @@ func getTasks(w http.ResponseWriter, r *http.Request) {
 	w.Write(resp)
 }
 
-func postTasks(w http.ResponseWriter, r *http.Request) {
+func addTask(w http.ResponseWriter, r *http.Request) {
 	var task Task
 	var buf bytes.Buffer
 
@@ -67,7 +68,11 @@ func postTasks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tasks[task.ID] = task
+	task, ok := tasks[task.ID]
+	if !ok {
+		http.Error(w, "Задача не найдена", http.StatusBadRequest)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
@@ -90,7 +95,10 @@ func getTask(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(resp)
+	_, err = w.Write(resp)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func deleteTask(w http.ResponseWriter, r *http.Request) {
@@ -111,7 +119,7 @@ func main() {
 	r := chi.NewRouter()
 
 	r.Get("/tasks", getTasks)
-	r.Post("/tasks", postTasks)
+	r.Post("/tasks", addTask)
 	r.Get("/tasks/{id}", getTask)
 	r.Delete("/tasks/{id}", deleteTask)
 
