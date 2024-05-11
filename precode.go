@@ -50,7 +50,10 @@ func getTasks(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("ContentType", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(resp)
+	_, err = w.Write(resp)
+	if err != nil {
+		log.Println(err)
+	}
 }
 
 func addTask(w http.ResponseWriter, r *http.Request) {
