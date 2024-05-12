@@ -71,11 +71,13 @@ func addTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	task, ok := tasks[task.ID]
-	if !ok {
+	//task, ok := tasks[task.ID]
+
+	if _, ok := tasks[task.ID]; ok {
 		http.Error(w, "Задача не найдена", http.StatusBadRequest)
 		return
 	}
+	tasks[task.ID] = task
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
